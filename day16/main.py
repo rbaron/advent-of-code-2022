@@ -1,6 +1,6 @@
 import re
 from collections import defaultdict
-from functools import lru_cache
+from functools import lru_cache, cache
 from itertools import product
 
 
@@ -31,27 +31,46 @@ def part1(valves):
     return compute_max_release(valves, "AA", frozenset(), 30)
 
 
+# https://en.wikipedia.org/wiki/Floyd%E2%80%93Warshall_algorithm
 def all_pairs_shortest_path(valves):
     dists = defaultdict(lambda: float("inf"))
-    for v, attrs in valves.items():
-        for child in v["children"]:
-            dists[v, child] = 1
+    for valve, attrs in valves.items():
+        for child in attrs["children"]:
+            dists[child, valve] = 1
+    for k, i, j in product(valves.keys(), valves.keys(), valves.keys()):
+        dists[i, j] = min(dists[i, j], dists[i, k] + dists[k, j])
     return dists
 
 
 def part2(valves):
     dists = all_pairs_shortest_path(valves)
-    print(dists)
-    # @lru_cache(maxsize=None)
-    # def search(t, u="AA", vs=frozenset(F), e=False):
-    #     return max(
-    #         [
-    #             F[v] * (t - D[u, v] - 1) + search(t - D[u, v] - 1, v, vs - {v}, e)
-    #             for v in vs
-    #             if D[u, v] < t
-    #         ]
-    #         + [search(26, vs=vs) if e else 0]
-    #     )
+
+    @lru_cache(maxsize=None)
+    def compute_max_cached(time, curr_valve, available, is_elephant):
+        return max(
+            [
+                valves[v]["rate"] * (time - dists[curr_valve, v] - 1)
+                + compute_max_cached(
+                    time - dists[curr_valve, v] - 1, v, available - {v}, is_elephant
+                )
+                for v in available
+                if dists[curr_valve, v] < time
+            ]
+            + [
+                compute_max_cached(
+                    26, curr_valve="AA", available=available, is_elephant=False
+                )
+                if is_elephant
+                else 0
+            ]
+        )
+
+    return compute_max_cached(
+        26,
+        "AA",
+        available=frozenset(v for v, attrs in valves.items() if attrs["rate"] > 0),
+        is_elephant=True,
+    )
 
 
 if __name__ == "__main__":
