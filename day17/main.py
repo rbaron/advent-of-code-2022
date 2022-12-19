@@ -25,7 +25,6 @@ def gen_moves_stream(moves):
 def simulate(moves, n, cache):
     stack = [0b1111111]
     s = gen_moves_stream(moves)
-    i = 0
     step = -1
     offset = 0
     rock_n = 0
@@ -36,7 +35,8 @@ def simulate(moves, n, cache):
         rock_n += 1
         d = 4
 
-        state = (tuple(rock), tuple(stack[-20:]), step)
+        # Assume that if the last 50 stack elements are the same, we're in a repeated state.
+        state = (tuple(rock), tuple(stack[-50:]), step)
         if rock == [0b0011110] and state in cache and not jumped_into_overdrive:
             jumped_into_overdrive = True
             prev_height, prev_rock_n = cache[state]
