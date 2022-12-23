@@ -10,18 +10,13 @@ ROT = {
 
 
 def walk(y, x, dir, instrs, tiles):
-    # print(y, x, dir)
     if not instrs:
         return y, x, dir
 
-    # print(instrs)
-
     next_instr, *remaining = instrs
     if next_instr in ROT:
-        # print(f"Turn {next_instr}, now facing {ROT[next_instr][dir]}")
         return walk(y, x, ROT[next_instr][dir], remaining, tiles)
 
-    # print(f"Will try to walk {next_instr} in direction {dir}")
     match dir:
         case "u":
             for _ in range(next_instr):
@@ -70,40 +65,40 @@ def part1(tiles, instrs):
 
 FACE_MAP = {
     0: {
-        "u": (3, "d", lambda y, x, W: (0, W - 1 - x)),
-        "r": (5, "l", lambda y, x, W: (y, W - 1)),
-        "l": (2, "d", lambda y, x, W: (0, y)),
-        "d": (1, "d", lambda y, x, W: (0, x)),
+        "u": (5, "r", lambda y, x, W: (x, 0)),
+        "r": (1, "r", lambda y, x, W: (y, 0)),
+        "l": (3, "r", lambda y, x, W: (W - 1 - y, 0)),
+        "d": (2, "d", lambda y, x, W: (0, x)),
     },
     1: {
-        "u": (0, "u", lambda y, x, W: (W - 1, x)),
-        "r": (5, "d", lambda y, x, W: (0, W - 1 - y)),
-        "l": (2, "l", lambda y, x, W: (y, W - 1)),
-        "d": (4, "d", lambda y, x, W: (0, x)),
+        "u": (5, "u", lambda y, x, W: (W - 1, x)),
+        "r": (4, "l", lambda y, x, W: (W - 1 - y, W - 1)),
+        "l": (0, "l", lambda y, x, W: (y, W - 1)),
+        "d": (2, "l", lambda y, x, W: (x, W - 1)),
     },
     2: {
-        "u": (0, "r", lambda y, x, W: (x, 0)),
-        "r": (1, "r", lambda y, x, W: (y, 0)),
-        "l": (3, "l", lambda y, x, W: (y, W - 1)),
-        "d": (4, "r", lambda y, x, W: (W - 1 - x, 0)),
+        "u": (0, "u", lambda y, x, W: (W - 1, x)),
+        "r": (1, "u", lambda y, x, W: (W - 1, y)),
+        "l": (3, "d", lambda y, x, W: (0, y)),
+        "d": (4, "d", lambda y, x, W: (0, x)),
     },
     3: {
-        "u": (0, "d", lambda y, x, W: (0, W - 1 - x)),
-        "r": (2, "r", lambda y, x, W: (y, 0)),
-        "l": (5, "u", lambda y, x, W: (W - 1, W - 1 - y)),
-        "d": (4, "u", lambda y, x, W: (W - 1, W - 1 - x)),
+        "u": (2, "r", lambda y, x, W: (x, 0)),
+        "r": (4, "r", lambda y, x, W: (y, 0)),
+        "l": (0, "r", lambda y, x, W: (W - 1 - y, 0)),
+        "d": (5, "d", lambda y, x, W: (0, x)),
     },
     4: {
-        "u": (1, "u", lambda y, x, W: (W - 1, x)),
-        "r": (5, "r", lambda y, x, W: (y, 0)),
-        "l": (2, "u", lambda y, x, W: (W - 1, W - 1 - y)),
-        "d": (3, "u", lambda y, x, W: (W - 1, W - 1 - x)),
+        "u": (2, "u", lambda y, x, W: (W - 1, x)),
+        "r": (1, "l", lambda y, x, W: (W - 1 - y, W - 1)),
+        "l": (3, "l", lambda y, x, W: (y, W - 1)),
+        "d": (5, "l", lambda y, x, W: (x, W - 1)),
     },
     5: {
-        "u": (1, "l", lambda y, x, W: (W - 1 - x, W - 1)),
-        "r": (0, "l", lambda y, x, W: (W - 1 - y, W - 1)),
-        "l": (4, "l", lambda y, x, W: (y, W - 1)),
-        "d": (3, "r", lambda y, x, W: (W - 1 - x, 0)),
+        "u": (3, "u", lambda y, x, W: (W - 1, x)),
+        "r": (4, "u", lambda y, x, W: (W - 1, y)),
+        "l": (0, "d", lambda y, x, W: (0, y)),
+        "d": (1, "d", lambda y, x, W: (0, x)),
     },
 }
 
@@ -111,17 +106,17 @@ FACE_MAP = {
 def get_face_offset(face, W):
     match face:
         case 0:
-            return 0, 2 * W
+            return 0, W
         case 1:
-            return W, 2 * W
+            return 0, 2 * W
         case 2:
             return W, W
         case 3:
-            return W, 0
+            return 2 * W, 0
         case 4:
-            return 2 * W, 2 * W
+            return 2 * W, W
         case 5:
-            return 2 * W, 3 * W
+            return 3 * W, 0
 
 
 def get_tile(face, y, x, tiles, W):
@@ -142,22 +137,18 @@ def move(y, x, dir):
 
 
 def walk2(y, x, face, dir, instrs, tiles, W):
-    print(f"Face {face} {dir} @ ({y}, {x})")
+    # print(f"Face {face} {dir} @ ({y}, {x})")
     if not instrs:
         return y, x, face, dir
 
     next_instr, *remaining = instrs
     if next_instr in ROT:
-        print(f"Turn {next_instr}, now facing {ROT[next_instr][dir]}")
+        # print(f"Turn {next_instr}, now facing {ROT[next_instr][dir]}")
         return walk2(y, x, face, ROT[next_instr][dir], remaining, tiles, W)
 
-    print(f"Steps: {next_instr}")
-    # print(f"Will try to walk {next_instr} in direction {dir}")
     for i in range(next_instr):
         # print(f"pos {y, x}")
         ny, nx = move(y, x, dir)
-        # print("Move to ", ny, nx)
-
         # Out of bounds? Switch face.
         if not (0 <= ny < W) or not (0 <= nx < W):
             next_face, next_dir, pos_fn = FACE_MAP[face][dir]
@@ -185,17 +176,16 @@ def walk2(y, x, face, dir, instrs, tiles, W):
 
 
 def part2(tiles, instrs):
-    # x = next(i for i, x in enumerate(tiles[0]) if x == ".")
-    W = len(tiles) // 3
+    W = len(tiles) // 4
     y, x, face, dir = walk2(0, 0, 0, "r", instrs, tiles, W)
-    print(f"Part 2: face {face} {dir} @ {(y, x)}")
+    # print(f"Part 2: face {face} {dir} @ {(y, x)}")
     y0, x0 = get_face_offset(face, W)
     DIR_SCORE = {"u": 3, "d": 1, "l": 2, "r": 0}
     return 1000 * (y0 + y + 1) + 4 * (x0 + x + 1) + DIR_SCORE[dir]
 
 
 if __name__ == "__main__":
-    with open("test-input.txt", "r") as f:
+    with open("input.txt", "r") as f:
         tiles, instrs = f.read().split("\n\n")
     instrs = [int(i) if i not in "LR" else i for i in re.findall("(\d+|\w)", instrs)]
     tiles = [[c for c in line.strip("\n")] for line in tiles.split("\n")]
@@ -205,8 +195,5 @@ if __name__ == "__main__":
     for row in tiles:
         row.extend(" " for _ in range(n - len(row)))
 
-    # for l in tiles:
-    #     print(l)
-
-    # print(part1(tiles, instrs))
+    print(part1(tiles, instrs))
     print(part2(tiles, instrs))
